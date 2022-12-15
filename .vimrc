@@ -7,6 +7,10 @@ set nocompatible              " be iMproved, required
 filetype on                  " required
 filetype plugin on
 
+
+" Shortcuts
+nnoremap <C-F> :Files<CR>
+
 " Specify a directory for plugins
 " - For Neovim: ~/.local/share/nvim/plugged
 " - Avoid using standard Vim directory names like 'plugin'
@@ -15,11 +19,13 @@ call plug#begin('~/.vim/plugged')
 " Plug 'Valloric/YouCompleteMe'
 "
 " JS/Typescript
-" Plug 'pangloss/vim-javascript'
-Plug 'leafgarland/typescript-vim'
-Plug 'curist/vim-angular-template'
-Plug 'Valloric/MatchTagAlways'
-"
+Plug 'pangloss/vim-javascript'
+" Plug 'mxw/vim-jsx'
+Plug 'maxmellon/vim-jsx-pretty'
+" Plug 'leafgarland/typescript-vim'
+" Plug 'curist/vim-angular-template'
+Plug 'Valloric/MatchTagAlways' " Hightlight xml tags
+Plug 'AndrewRadev/tagalong.vim' " rename closing tags
 
 " 
 " Directory browser 
@@ -29,24 +35,25 @@ Plug 'tpope/vim-vinegar' " Enhances the default directory browser
 
 " Plug 'reasonml-editor/vim-reason-plus'
 Plug 'mileszs/ack.vim'
-Plug 'mxw/vim-jsx' " JSX indentation and highlight
-
 
 " Plug 'autozimu/LanguageClient-neovim', {
 "     \ 'branch': 'next',
 "     \ 'do': 'bash install.sh',
 "    \ }
 
-" (Optional) Multi-entry selection UI.
-Plug 'junegunn/fzf' " Search
-Plug 'junegunn/fzf.vim' " Search dependency
+" Search files accross dependency
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'junegunn/fzf.vim' 
 
 Plug 'tpope/vim-fugitive' " Git plugin
 
 Plug 'lifepillar/vim-mucomplete' " Autocompletion
 " Plug 'ervandew/supertab' " Autocompletion
 
-Plug 'w0rp/ale' " Linter
+Plug 'dense-analysis/ale' " Linter
+Plug 'prettier/vim-prettier', {
+  \ 'do': 'yarn install',
+  \ 'for': ['javascript', 'typescript', 'css', 'less', 'scss', 'json', 'graphql', 'markdown', 'vue', 'svelte', 'yaml', 'html'] }
 
 
 " Color schemes
@@ -66,6 +73,17 @@ Plug 'rust-lang/rust.vim'
 " Surround things
 Plug 'tpope/vim-surround'
 
+" Ruby on Rails
+Plug 'vim-ruby/vim-ruby'
+
+" GraphQL
+Plug 'jparise/vim-graphql'
+
+" Snippets
+Plug 'SirVer/ultisnips'
+Plug 'mlaursen/vim-react-snippets'
+Plug 'neoclide/coc-snippets' " Show plug snippets
+
 " Initialize plugin system
 call plug#end()
 
@@ -75,7 +93,11 @@ call plug#end()
 " CONFIGS
 set hidden " Dont have to save a file when jumping to another one
 set wildignore+=**/node_modules/** " Ignore node_modules in search
+set wildignore+=**/ios/** " Ignore node_modules in search
+set wildignore+=**/android/** " Ignore node_modules in search
 let mapleader = ","
+set backspace=indent,eol,start  " more powerful backspacing
+
 
 " SPACES &  TABS
 set tabstop=2       " number of visual spaces per tab
@@ -111,6 +133,16 @@ if (empty($TMUX))
 endif
 
 colorscheme onehalfdark
+
+" Match Tag always: enable JSX
+let g:mta_filetypes = {
+    \ 'javascript.jsx': 1,
+    \ 'html' : 1,
+    \ 'xhtml' : 1,
+    \ 'xml' : 1,
+    \ 'jinja' : 1,
+    \}
+
 
 
 " newtr (Directory navigation)
@@ -156,16 +188,21 @@ let g:mucomplete#chains = {
 " set runtimepath^=~/.vim/bundle/ctrlp.vim
 let g:ctrlp_map = '<c-p>'
 let g:ctrlp_show_hidden = 1
-let g:ctrlp_custom_ignore = 'node_modules\|DS_Store\|git'
+let g:ctrlp_custom_ignore = 'node_modules\|DS_Store\|git\|ios\|android'
 
-" FZF
-let FZF_DEFAULT_COMMAND = 'ag --nocolor --ignore node_modules -g ""'
 
 " ALE (LINTER)
-" Define linters to use to fix files
-"let g:ale_fixers = {
-" \   'javascript': ['eslint'],
-" \}
+" Define prettiers to use to
+let g:ale_fixers = {
+ \   'javascript': ['prettier'],
+ \}
+let g:ale_linters = {
+\   'javascript': ['eslint'],
+\   'ocaml': ['merlin'],
+\}
+let g:ale_linters_explicit = 1
+let g:ale_fix_on_save = 1
+
 " nmap <leader>d <Plug>(ale_fix)
 " let g:ale_completion_enabled = 1 " completion
 "
@@ -173,11 +210,15 @@ let g:ale_change_sign_column_color = 1 " Sets column with signs to same backgrou
 let g:ale_lint_delay = 8
 let g:ale_sign_error = '✖'
 let g:ale_sign_warning = '→'
-let g:ale_linters = {
-\   'javascript': ['eslint'],
-\   'ocaml': ['merlin'],
-\}
+
 let g:ale_completion_enabled = 1
+
+
+" PRETTIER
+let g:prettier#autoformat = 1
+let g:prettier#autoformat_require_pragma = 0
+"let g:prettier#config#arrow_parens = 'avoid'
+
 
 
 " AUTO SAVE
@@ -207,3 +248,5 @@ set shiftwidth=2
 let g:opamshare = substitute(system('opam config var share'),'\n$','','''') "required find merlin config
 execute "set rtp+=" . g:opamshare . "/merlin/vim"
 
+" Tag alone
+let g:tagalong_filetypes = ['eco', 'eelixir', 'ejs', 'eruby', 'html', 'htmldjango', 'javascriptreact', 'jsx', 'php', 'typescriptreact', 'xml', 'js']
